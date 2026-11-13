@@ -2,6 +2,7 @@ const zonaJatuh = document.getElementById("zonaJatuh");
 const masukanBerkas = document.getElementById("masukanBerkas");
 const gambarPratinjau = document.getElementById("gambarPratinjau");
 const keteranganPratinjau = document.getElementById("keteranganPratinjau");
+const pilihanMode = document.getElementById("pilihanMode");
 const pilihanSensitivitas = document.getElementById("pilihanSensitivitas");
 const masukanLuasMinimum = document.getElementById("masukanLuasMinimum");
 const nilaiLuasMinimum = document.getElementById("nilaiLuasMinimum");
@@ -13,6 +14,15 @@ const teksVerdict = document.getElementById("teksVerdict");
 const teksKeparahan = document.getElementById("teksKeparahan");
 const galeriTahapan = document.getElementById("galeriTahapan");
 const badanTabelCacat = document.getElementById("badanTabelCacat");
+
+const LABEL_TAHAPAN_BUAH = [
+  ["asli", "1. Citra Asli", "Foto buah / makanan yang diunggah."],
+  ["segmentasi", "2. Segmentasi Produk", "Buah dipisahkan dari latar berdasarkan warna sudut citra (ruang warna LAB)."],
+  ["kulit", "3. Kulit Buah", "Daun hijau (hijau) dikeluarkan; yang dianalisis hanya kulit buah (oranye)."],
+  ["blackhat", "4. Black-Hat", "Menonjolkan bercak yang lebih gelap dari kulit sekitarnya."],
+  ["masker", "5. Masker Busuk", "Wilayah bercak busuk/jamur: inti gelap terkonfirmasi beserta wilayah penggelapan di sekitarnya."],
+  ["hasil", "6. Hasil Deteksi", "Kontur merah dan kotak pembatas pada setiap bercak busuk."],
+];
 
 const LABEL_TAHAPAN = [
   ["asli", "1. Citra Asli", "Citra produk yang diunggah."],
@@ -77,10 +87,17 @@ function aturStatus(teks, galat) {
 
 function tampilkanHasil(data) {
   const r = data.ringkasan;
+  const modeBuah = r.mode === "buah";
   kotakVerdict.className = "kotak-verdict " + (r.verdict === "CACAT" ? "cacat" : "lulus");
-  teksVerdict.textContent = r.verdict === "CACAT"
-    ? "HASIL: CACAT — produk ditolak"
-    : "HASIL: LULUS — tidak ditemukan cacat signifikan";
+  if (modeBuah) {
+    teksVerdict.textContent = r.verdict === "CACAT"
+      ? "HASIL: BUSUK — buah ditolak"
+      : "HASIL: SEGAR — buah layak";
+  } else {
+    teksVerdict.textContent = r.verdict === "CACAT"
+      ? "HASIL: CACAT — produk ditolak"
+      : "HASIL: LULUS — tidak ditemukan cacat signifikan";
+  }
   if (r.verdict === "CACAT") {
     teksKeparahan.hidden = false;
     teksKeparahan.textContent = "Keparahan: " + r.keparahan;
@@ -89,13 +106,14 @@ function tampilkanHasil(data) {
   }
   document.getElementById("metrikJumlah").textContent = r.jumlah_cacat;
   document.getElementById("metrikLuas").textContent = r.luas_cacat_persen + " %";
-  document.getElementById("metrikAmbang").textContent = r.ambang_terpakai + " (Otsu " + r.ambang_otsu + ")";
+  document.getElementById("metrikAmbang").textContent = r.teks_ambang || (r.ambang_terpakai + " (Otsu " + r.ambang_otsu + ")");
   document.getElementById("metrikUkuran").textContent = r.ukuran.lebar + " × " + r.ukuran.tinggi + " px";
   document.getElementById("metrikRata").textContent = r.rata_rata_intensitas;
   document.getElementById("metrikEntropi").textContent = r.entropi;
 
   galeriTahapan.innerHTML = "";
-  LABEL_TAHAPAN.forEach(([kunci, judul, penjelasan]) => {
+  const labelAktif = modeBuah ? LABEL_TAHAPAN_BUAH : LABEL_TAHAPAN;
+  labelAktif.forEach(([kunci, judul, penjelasan]) => {
     if (!data.tahapan[kunci]) return;
     const figur = document.createElement("figure");
     figur.className = "tahap";
@@ -149,6 +167,7 @@ async function proses() {
       formulir.append("gambar", berkasTerpilih);
       formulir.append("sensitivitas", pilihanSensitivitas.value);
       formulir.append("luas_minimum", luasMinimumKirim());
+      formulir.append("mode", pilihanMode.value);
       respons = await fetch("/api/deteksi", { method: "POST", body: formulir });
     } else if (contohTerpilih) {
       respons = await fetch("/api/deteksi-contoh", {
@@ -159,6 +178,7 @@ async function proses() {
           nama: contohTerpilih.nama,
           sensitivitas: pilihanSensitivitas.value,
           luas_minimum: luasMinimumKirim(),
+          mode: pilihanMode.value,
         }),
       });
     } else {
@@ -195,7 +215,7 @@ async function muatContoh() {
       img.alt = contoh.kelas + " " + contoh.nama;
       img.loading = "lazy";
       const span = document.createElement("span");
-      span.textContent = contoh.kelas;
+      span.textContent = contoh.kelas === "buah" ? contoh.nama.replace(/\.jpg$/i, "") : contoh.kelas;
       tombol.append(img, span);
       tombol.addEventListener("click", () => {
         document.querySelectorAll(".contoh-item").forEach((el) => el.classList.remove("aktif"));
@@ -203,6 +223,7 @@ async function muatContoh() {
         berkasTerpilih = null;
         masukanBerkas.value = "";
         contohTerpilih = contoh;
+        pilihanMode.value = contoh.mode || "baja";
         tampilkanPratinjau(contoh.url, "Contoh dataset: " + contoh.kelas + "/" + contoh.nama);
         segarkanTombol();
         proses();

@@ -46,7 +46,20 @@ Untuk mengunduh dataset penuh (±27 MB) ke folder `dataset/NEU-DET/`:
 python scripts/unduh_dataset.py
 ```
 
-## Pipeline Pengolahan Citra
+## Mode Buah & Makanan
+
+Selain mode baja di bawah, aplikasi punya **Mode Buah** (`backend/deteksi_buah.py`) untuk produk buah/makanan — topik spesifik lain pada Tema D panduan ("quality control buah/sayuran"). Pipeline-nya berbeda karena foto buah berwarna dan berlatar bebas:
+
+1. **Segmentasi produk** — buah dipisahkan dari latar memakai jarak warna LAB terhadap warna median sudut-sudut citra; diambil kontur terbesar.
+2. **Pengeluaran daun** — piksel hijau daun (rentang hue HSV + dominasi kanal G) dibuang dari wilayah analisis; tangkai/daun tidak dinilai.
+3. **Kulit buah** — masker produk tanpa daun, ditepi-erosi agar bayangan tepi siluet tidak ikut dinilai.
+4. **Inti bercak terkonfirmasi** — black-hat gelap yang juga didukung piksel jauh lebih gelap dari median kecerahan kulit (V < 0,55 × median), sehingga tekstur pori kulit dan bayangan tetesan air tidak lolos.
+5. **Wilayah bercak** — komponen penggelapan di sekitar inti (V < 0,76 × median atau black-hat sedang, plus jamur pucat di dekat inti) yang menyentuh inti.
+6. **Keputusan** — BUSUK bila luas bercak ≥ 2,5% luas kulit (preset Sedang; Rendah 4,0%, Tinggi 1,5%).
+
+Hasil uji Mode Buah pada 60 citra dataset buah Kaggle (6 citra × 10 kelas segar/busuk): **41/60 tepat (68,3%)** — per kelas: mangga busuk 6/6, jeruk segar 6/6, stroberi segar 6/6, pisang busuk 5/6, mangga segar 5/6, apel busuk 4/6, pisang segar 3/6, jeruk busuk 3/6, stroberi busuk 2/6, apel segar 1/6. Kelemahan utamanya: belang merah alami apel segar terbaca sebagai penggelapan, dan jamur stroberi yang pucat tidak selalu memiliki inti gelap. Sebagai pembanding, foto jeruk segar berdaun + bertetesan air divonis **CACAT 33,8% oleh Mode Baja** tetapi **SEGAR 1,8% oleh Mode Buah** — mode harus dipilih sesuai jenis produknya.
+
+## Pipeline Pengolahan Citra (Mode Baja)
 
 Semua tahap ada di `backend/deteksi.py` dan divisualkan satu per satu di halaman web:
 
@@ -106,7 +119,7 @@ python scripts/evaluasi.py --folder dataset/NEU-DET/validation
 ## Struktur Folder
 
 ```
-backend/    app.py (server Flask + API) · deteksi.py (pipeline citra) · penjaga.py (penjaga wajah Haar) · requirements.txt
+backend/    app.py (server Flask + API) · deteksi.py (pipeline baja) · deteksi_buah.py (pipeline buah) · penjaga.py (penjaga wajah Haar) · requirements.txt
 frontend/   index.html · style.css · script.js
 dataset/    contoh/ (20 citra contoh) · README_DATASET.md
 scripts/    unduh_dataset.py · evaluasi.py · buat_contoh_normal.py

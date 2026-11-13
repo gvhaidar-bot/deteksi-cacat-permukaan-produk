@@ -32,6 +32,12 @@
     </figure>
 
     <h2>2. Atur Parameter</h2>
+    <label class="kolom" for="pilihanMode">Mode pemeriksaan</label>
+    <select id="pilihanMode">
+      <option value="baja" selected>Baja / produk manufaktur — deteksi cacat permukaan (dataset NEU)</option>
+      <option value="buah">Buah &amp; makanan — deteksi bercak busuk / jamur</option>
+    </select>
+    <p class="petunjuk">Pilih mode sesuai produknya. Mode Buah memakai analisis warna (HSV): buah disegmentasi dari latar, daun hijau dikeluarkan, lalu bercak gelap/jamur pada kulit dihitung terhadap luas kulit buah. Jeruk segar berdaun dan bertetesan air tetap dinilai dari kulitnya saja.</p>
     <label class="kolom" for="pilihanSensitivitas">Sensitivitas deteksi</label>
     <select id="pilihanSensitivitas">
       <option value="rendah">Rendah — hanya cacat yang jelas</option>
@@ -44,8 +50,8 @@
     <button id="tombolProses" class="tombol tombol-utama tombol-penuh" disabled>Proses Deteksi</button>
     <p id="statusProses" class="status" role="status"></p>
 
-    <h2>3. Citra Contoh Dataset NEU</h2>
-    <p class="petunjuk">Klik salah satu contoh untuk langsung mengujinya. Folder <em>normal_sintetis</em> adalah citra permukaan bersih hasil sintesis untuk menguji keputusan LULUS, karena dataset NEU hanya berisi citra bercacat.</p>
+    <h2>3. Citra Contoh Dataset</h2>
+    <p class="petunjuk">Klik salah satu contoh untuk langsung mengujinya — mode pemeriksaan menyesuaikan otomatis (contoh baja memakai Mode Baja, contoh buah memakai Mode Buah). Folder <em>normal_sintetis</em> adalah citra permukaan bersih hasil sintesis untuk menguji keputusan LULUS, karena dataset NEU hanya berisi citra bercacat.</p>
     <div id="galeriContoh" class="galeri-contoh"></div>
   </section>
 
@@ -58,7 +64,7 @@
     <div class="grid-metrik">
       <div class="kartu-metrik"><span class="metrik-label">Jumlah cacat</span><strong id="metrikJumlah">–</strong></div>
       <div class="kartu-metrik"><span class="metrik-label">Luas area cacat</span><strong id="metrikLuas">–</strong></div>
-      <div class="kartu-metrik"><span class="metrik-label">Ambang Otsu terpakai</span><strong id="metrikAmbang">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Ambang keputusan</span><strong id="metrikAmbang">–</strong></div>
       <div class="kartu-metrik"><span class="metrik-label">Ukuran citra</span><strong id="metrikUkuran">–</strong></div>
       <div class="kartu-metrik"><span class="metrik-label">Rata-rata intensitas</span><strong id="metrikRata">–</strong></div>
       <div class="kartu-metrik"><span class="metrik-label">Entropi citra</span><strong id="metrikEntropi">–</strong></div>

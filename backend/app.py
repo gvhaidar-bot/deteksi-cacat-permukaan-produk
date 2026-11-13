@@ -6,6 +6,7 @@ import numpy as np
 from flask import Flask, jsonify, request, send_from_directory
 
 from deteksi import proses_deteksi
+from deteksi_buah import proses_deteksi_buah
 from penjaga import hitung_wajah
 
 
@@ -22,6 +23,7 @@ PESAN_WAJAH = (
 DASAR = os.path.dirname(os.path.abspath(__file__))
 FOLDER_FRONTEND = os.path.join(DASAR, "..", "frontend")
 FOLDER_CONTOH = os.path.join(DASAR, "..", "dataset", "contoh")
+FOLDER_CONTOH_BUAH = os.path.join(DASAR, "..", "dataset", "contoh-buah")
 EKSTENSI_DIIZINKAN = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 UKURAN_MAKS_BYTE = 10 * 1024 * 1024
 
@@ -46,7 +48,11 @@ def jalankan_deteksi(gambar, formulir):
     luas_minimum = None
     if str(luas_mentah).strip().isdigit():
         luas_minimum = max(10, min(5000, int(luas_mentah)))
-    ringkasan, tahapan = proses_deteksi(gambar, sensitivitas, luas_minimum)
+    mode = formulir.get("mode", "baja")
+    if mode == "buah":
+        ringkasan, tahapan = proses_deteksi_buah(gambar, sensitivitas, luas_minimum)
+    else:
+        ringkasan, tahapan = proses_deteksi(gambar, sensitivitas, luas_minimum)
     return {
         "ringkasan": ringkasan,
         "tahapan": {nama: gambar_ke_base64(img) for nama, img in tahapan.items()},
@@ -82,14 +88,28 @@ def daftar_contoh():
                         {
                             "kelas": kelas,
                             "nama": nama,
+                            "mode": "baja",
                             "url": f"/api/contoh-file/{kelas}/{nama}",
                         }
                     )
+    if os.path.isdir(FOLDER_CONTOH_BUAH):
+        for nama in sorted(os.listdir(FOLDER_CONTOH_BUAH)):
+            if os.path.splitext(nama)[1].lower() in EKSTENSI_DIIZINKAN:
+                hasil.append(
+                    {
+                        "kelas": "buah",
+                        "nama": nama,
+                        "mode": "buah",
+                        "url": f"/api/contoh-file/buah/{nama}",
+                    }
+                )
     return jsonify({"contoh": hasil})
 
 
 @app.route("/api/contoh-file/<kelas>/<nama>")
 def berkas_contoh(kelas, nama):
+    if kelas == "buah":
+        return send_from_directory(FOLDER_CONTOH_BUAH, nama)
     folder = os.path.join(FOLDER_CONTOH, kelas)
     return send_from_directory(folder, nama)
 
@@ -123,7 +143,10 @@ def deteksi_contoh():
     nama = str(isi.get("nama", ""))
     if "/" in kelas or "\\" in kelas or "/" in nama or "\\" in nama or ".." in nama:
         return jsonify({"galat": "Nama contoh tidak valid."}), 400
-    path = os.path.join(FOLDER_CONTOH, kelas, nama)
+    if kelas == "buah":
+        path = os.path.join(FOLDER_CONTOH_BUAH, nama)
+    else:
+        path = os.path.join(FOLDER_CONTOH, kelas, nama)
     if not os.path.isfile(path):
         return jsonify({"galat": "Contoh tidak ditemukan."}), 404
     gambar = cv2.imread(path, cv2.IMREAD_COLOR)
@@ -132,6 +155,7 @@ def deteksi_contoh():
     formulir = {
         "sensitivitas": str(isi.get("sensitivitas", "sedang")),
         "luas_minimum": str(isi.get("luas_minimum", "")),
+        "mode": str(isi.get("mode") or ("buah" if kelas == "buah" else "baja")),
     }
     try:
         return jsonify(jalankan_deteksi(gambar, formulir))

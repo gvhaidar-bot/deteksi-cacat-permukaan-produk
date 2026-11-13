@@ -133,7 +133,10 @@ def proses_deteksi(gambar, sensitivitas="sedang", luas_minimum=None):
     entropi = float(-(probabilitas * np.log2(probabilitas)).sum())
 
     ringkasan = {
+        "mode": "baja",
         "verdict": "CACAT" if ada_cacat else "LULUS",
+        "label_verdict": "CACAT" if ada_cacat else "LULUS",
+        "teks_ambang": f"{round(ambang, 2)} (Otsu {round(float(ambang_otsu), 2)})",
         "jumlah_cacat": len(daftar_cacat),
         "luas_cacat_persen": round(rasio_persen, 3),
         "luas_cacat_piksel": int(round(luas_cacat_total)),
