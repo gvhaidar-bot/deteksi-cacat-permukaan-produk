@@ -1,0 +1,72 @@
+{
+  "folder": "dataset/NEU-DET/validation",
+  "sensitivitas": "sedang",
+  "jumlah_citra": 360,
+  "citra_terdeteksi_cacat": 360,
+  "tingkat_deteksi_persen": 100.0,
+  "kotak_ground_truth": 854,
+  "kotak_terlokalisasi": 706,
+  "tingkat_lokalisasi_persen": 82.7,
+  "per_kelas": [
+    {
+      "kelas": "crazing",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 162,
+      "kotak_terlokalisasi": 155,
+      "tingkat_lokalisasi_persen": 95.7,
+      "rata_rata_luas_cacat_persen": 71.97
+    },
+    {
+      "kelas": "inclusion",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 147,
+      "kotak_terlokalisasi": 115,
+      "tingkat_lokalisasi_persen": 78.2,
+      "rata_rata_luas_cacat_persen": 12.04
+    },
+    {
+      "kelas": "patches",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 184,
+      "kotak_terlokalisasi": 116,
+      "tingkat_lokalisasi_persen": 63.0,
+      "rata_rata_luas_cacat_persen": 38.19
+    },
+    {
+      "kelas": "pitted_surface",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 105,
+      "kotak_terlokalisasi": 91,
+      "tingkat_lokalisasi_persen": 86.7,
+      "rata_rata_luas_cacat_persen": 33.08
+    },
+    {
+      "kelas": "rolled-in_scale",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 132,
+      "kotak_terlokalisasi": 127,
+      "tingkat_lokalisasi_persen": 96.2,
+      "rata_rata_luas_cacat_persen": 23.04
+    },
+    {
+      "kelas": "scratches",
+      "jumlah_citra": 60,
+      "citra_terdeteksi_cacat": 60,
+      "tingkat_deteksi_persen": 100.0,
+      "kotak_ground_truth": 124,
+      "kotak_terlokalisasi": 102,
+      "tingkat_lokalisasi_persen": 82.3,
+      "rata_rata_luas_cacat_persen": 9.21
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+kelas,jumlah_citra,citra_terdeteksi_cacat,tingkat_deteksi_persen,kotak_ground_truth,kotak_terlokalisasi,tingkat_lokalisasi_persen,rata_rata_luas_cacat_persen
+crazing,60,60,100.0,162,155,95.7,71.97
+inclusion,60,60,100.0,147,115,78.2,12.04
+patches,60,60,100.0,184,116,63.0,38.19
+pitted_surface,60,60,100.0,105,91,86.7,33.08
+rolled-in_scale,60,60,100.0,132,127,96.2,23.04
+scratches,60,60,100.0,124,102,82.3,9.21

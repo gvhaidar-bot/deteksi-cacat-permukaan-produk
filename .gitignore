@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+dataset/NEU-DET/
+dataset/*.zip
+.DS_Store

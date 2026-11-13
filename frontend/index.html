@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deteksi Cacat Permukaan Produk — Tema D Industri &amp; Manufaktur</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="kepala">
+  <div class="wadah">
+    <p class="label-tema">Pengolahan Citra Digital (22TIF0262) · Tema D: Industri dan Manufaktur</p>
+    <h1>Deteksi Cacat / Kerusakan Permukaan Produk</h1>
+    <p class="subjudul">Quality control permukaan baja berbasis pengolahan citra digital klasik: morfologi black-hat &amp; top-hat, segmentasi ambang Otsu, deteksi tepi Canny, dan analisis kontur. Dataset uji: NEU Surface Defect Database (1.800 citra, 6 jenis cacat).</p>
+  </div>
+</header>
+
+<main class="wadah tata-letak">
+  <section class="panel kontrol">
+    <h2>1. Pilih Citra Produk</h2>
+    <div id="zonaJatuh" class="zona-jatuh">
+      <p class="zona-teks-besar">Tarik &amp; letakkan gambar di sini</p>
+      <p class="zona-teks-kecil">atau</p>
+      <label class="tombol tombol-utama" for="masukanBerkas">Pilih Berkas Gambar</label>
+      <input type="file" id="masukanBerkas" accept=".jpg,.jpeg,.png,.bmp,.webp" hidden>
+      <p class="zona-teks-kecil">JPG / PNG / BMP / WebP, maks 10 MB</p>
+    </div>
+    <figure class="pratinjau">
+      <img id="gambarPratinjau" alt="Pratinjau citra yang dipilih" hidden>
+      <figcaption id="keteranganPratinjau">Belum ada citra dipilih. Kamu juga bisa memakai citra contoh dataset di bawah.</figcaption>
+    </figure>
+
+    <h2>2. Atur Parameter</h2>
+    <label class="kolom" for="pilihanSensitivitas">Sensitivitas deteksi</label>
+    <select id="pilihanSensitivitas">
+      <option value="rendah">Rendah — hanya cacat yang jelas</option>
+      <option value="sedang" selected>Sedang — seimbang (bawaan)</option>
+      <option value="tinggi">Tinggi — cacat halus ikut terdeteksi</option>
+    </select>
+    <label class="kolom" for="masukanLuasMinimum">Luas minimum cacat (piksel): <span id="nilaiLuasMinimum">bawaan preset</span></label>
+    <input type="range" id="masukanLuasMinimum" min="0" max="600" step="10" value="0">
+    <p class="petunjuk">Geser ke 0 untuk memakai luas minimum bawaan preset. Nilai lebih besar mengabaikan bintik kecil / noise.</p>
+    <button id="tombolProses" class="tombol tombol-utama tombol-penuh" disabled>Proses Deteksi</button>
+    <p id="statusProses" class="status" role="status"></p>
+
+    <h2>3. Citra Contoh Dataset NEU</h2>
+    <p class="petunjuk">Klik salah satu contoh untuk langsung mengujinya. Folder <em>normal_sintetis</em> adalah citra permukaan bersih hasil sintesis untuk menguji keputusan LULUS, karena dataset NEU hanya berisi citra bercacat.</p>
+    <div id="galeriContoh" class="galeri-contoh"></div>
+  </section>
+
+  <section class="panel hasil">
+    <h2>Hasil Pemeriksaan</h2>
+    <div id="kotakVerdict" class="kotak-verdict netral">
+      <span id="teksVerdict">Menunggu citra diproses</span>
+      <span id="teksKeparahan" class="lencana-keparahan" hidden></span>
+    </div>
+    <div class="grid-metrik">
+      <div class="kartu-metrik"><span class="metrik-label">Jumlah cacat</span><strong id="metrikJumlah">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Luas area cacat</span><strong id="metrikLuas">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Ambang Otsu terpakai</span><strong id="metrikAmbang">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Ukuran citra</span><strong id="metrikUkuran">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Rata-rata intensitas</span><strong id="metrikRata">–</strong></div>
+      <div class="kartu-metrik"><span class="metrik-label">Entropi citra</span><strong id="metrikEntropi">–</strong></div>
+    </div>
+
+    <h3>Tahapan Pengolahan Citra</h3>
+    <div id="galeriTahapan" class="galeri-tahapan">
+      <p class="petunjuk">Setelah proses berjalan, setiap tahap pipeline akan tampil di sini: grayscale → blur → black-hat &amp; top-hat → peta anomali → masker segmentasi → tepi Canny → hasil.</p>
+    </div>
+
+    <h3>Rincian Setiap Cacat</h3>
+    <div class="bungkus-tabel">
+      <table>
+        <thead>
+          <tr><th>No</th><th>Dugaan Jenis</th><th>Luas (piksel)</th><th>Luas (%)</th><th>Posisi Kotak (x, y, lebar × tinggi)</th></tr>
+        </thead>
+        <tbody id="badanTabelCacat">
+          <tr><td colspan="5" class="sel-kosong">Belum ada data. Proses sebuah citra terlebih dahulu.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="petunjuk">Dugaan jenis ditentukan dari fitur geometris kontur (rasio aspek, luas, sirkularitas) — bukan klasifikasi machine learning. Keputusan akhir: <strong>CACAT</strong> bila luas area cacat ≥ 0,8% dari luas citra, selain itu <strong>LULUS</strong>.</p>
+  </section>
+</main>
+
+<footer class="kaki">
+  <div class="wadah">
+    <p>Dataset: NEU Surface Defect Database — Song &amp; Yan, Northeastern University (via Kaggle). 1.800 citra grayscale 200×200 piksel: crazing, inclusion, patches, pitted surface, rolled-in scale, scratches (masing-masing 300 citra).</p>
+    <p>Backend Flask + OpenCV · Frontend HTML, CSS, JavaScript murni.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
