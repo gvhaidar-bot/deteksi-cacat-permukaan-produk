@@ -6,6 +6,18 @@ import numpy as np
 from flask import Flask, jsonify, request, send_from_directory
 
 from deteksi import proses_deteksi
+from penjaga import hitung_wajah
+
+
+class PenolakanWajah(Exception):
+    pass
+
+
+PESAN_WAJAH = (
+    "Gambar terdeteksi berisi wajah manusia, jadi tidak diproses. "
+    "Aplikasi ini khusus memeriksa permukaan PRODUK (buah, makanan, dan benda/produk manufaktur) — "
+    "manusia bukan produk dan tidak dinilai cacat. Silakan unggah foto produk tanpa orang di dalamnya."
+)
 
 DASAR = os.path.dirname(os.path.abspath(__file__))
 FOLDER_FRONTEND = os.path.join(DASAR, "..", "frontend")
@@ -25,6 +37,8 @@ def gambar_ke_base64(gambar):
 
 
 def jalankan_deteksi(gambar, formulir):
+    if hitung_wajah(gambar) > 0:
+        raise PenolakanWajah(PESAN_WAJAH)
     sensitivitas = formulir.get("sensitivitas", "sedang")
     if sensitivitas not in ("rendah", "sedang", "tinggi"):
         sensitivitas = "sedang"
@@ -96,7 +110,10 @@ def deteksi_unggahan():
     gambar = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
     if gambar is None:
         return jsonify({"galat": "Berkas tidak dapat dibaca sebagai gambar."}), 400
-    return jsonify(jalankan_deteksi(gambar, request.form))
+    try:
+        return jsonify(jalankan_deteksi(gambar, request.form))
+    except PenolakanWajah as penolakan:
+        return jsonify({"galat": str(penolakan), "jenis_galat": "wajah_terdeteksi"}), 422
 
 
 @app.route("/api/deteksi-contoh", methods=["POST"])
@@ -116,7 +133,10 @@ def deteksi_contoh():
         "sensitivitas": str(isi.get("sensitivitas", "sedang")),
         "luas_minimum": str(isi.get("luas_minimum", "")),
     }
-    return jsonify(jalankan_deteksi(gambar, formulir))
+    try:
+        return jsonify(jalankan_deteksi(gambar, formulir))
+    except PenolakanWajah as penolakan:
+        return jsonify({"galat": str(penolakan), "jenis_galat": "wajah_terdeteksi"}), 422
 
 
 if __name__ == "__main__":

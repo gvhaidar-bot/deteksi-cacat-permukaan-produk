@@ -8,6 +8,21 @@ Aplikasi web untuk memeriksa foto permukaan produk (baja) dan memutuskan **LULUS
 - **Frontend:** HTML, CSS, JavaScript murni (folder `frontend/`)
 - **Backend:** Python + Flask + OpenCV (folder `backend/`)
 
+## Ruang Lingkup: Hanya Produk, Bukan Manusia
+
+Aplikasi ini memeriksa **permukaan produk** — buah, makanan, dan benda/produk manufaktur (dataset utamanya permukaan baja). Manusia **bukan** produk dan tidak pernah dinilai oleh sistem ini.
+
+Karena itu backend dilengkapi **penjaga wajah** (`backend/penjaga.py`): sebelum deteksi cacat berjalan, citra diperiksa dengan dua Haar Cascade OpenCV (`frontalface_default` + `frontalface_alt2`); sebuah wajah hanya diakui bila **kedua** cascade menemukan wajah yang saling tumpang tindih di lokasi yang sama. Bila ada wajah terkonfirmasi, permintaan ditolak (HTTP 422) dengan pesan penjelasan, dan tidak ada verdict yang dikeluarkan.
+
+Kenapa penjaga ini perlu: detektor cacat bekerja pada citra keabuan dan menandai wilayah yang berbeda dari permukaan sekitarnya — pada foto manusia, wilayah kulit, bayangan, dan fitur wajah akan terbaca sebagai "anomali permukaan". Itu bukan cacat; itu memang di luar ruang lingkup sistem, jadi sistem menolaknya secara eksplisit.
+
+Hasil uji penjaga (13 Nov 2026):
+
+- 3/3 foto wajah asli (sampel LFW, tampak depan) → **ditolak**
+- 33/33 citra contoh produk (baja NEU + buah) → **tetap diproses** (konfirmasi dua cascade menghilangkan positif palsu Haar yang sempat muncul pada 2 citra patches)
+
+Keterbatasan: penjaga menangkap wajah tampak depan; foto orang dari belakang / tanpa wajah terlihat bisa saja lolos — karena itu ruang lingkup produk juga ditegaskan pada teks antarmuka web.
+
 ## Dataset
 
 **NEU Surface Defect Database** (NEU-DET) — Song & Yan, Northeastern University, dibagikan lewat Kaggle (sumber dataset yang dianjurkan pada panduan tugas):
@@ -91,7 +106,7 @@ python scripts/evaluasi.py --folder dataset/NEU-DET/validation
 ## Struktur Folder
 
 ```
-backend/    app.py (server Flask + API) · deteksi.py (pipeline citra) · requirements.txt
+backend/    app.py (server Flask + API) · deteksi.py (pipeline citra) · penjaga.py (penjaga wajah Haar) · requirements.txt
 frontend/   index.html · style.css · script.js
 dataset/    contoh/ (20 citra contoh) · README_DATASET.md
 scripts/    unduh_dataset.py · evaluasi.py · buat_contoh_normal.py

@@ -11,7 +11,7 @@
   <div class="wadah">
     <p class="label-tema">Pengolahan Citra Digital (22TIF0262) · Tema D: Industri dan Manufaktur</p>
     <h1>Deteksi Cacat / Kerusakan Permukaan Produk</h1>
-    <p class="subjudul">Quality control permukaan baja berbasis pengolahan citra digital klasik: morfologi black-hat &amp; top-hat, segmentasi ambang Otsu, deteksi tepi Canny, dan analisis kontur. Dataset uji: NEU Surface Defect Database (1.800 citra, 6 jenis cacat).</p>
+    <p class="subjudul">Quality control permukaan <strong>produk</strong> berbasis pengolahan citra digital klasik: morfologi black-hat &amp; top-hat, segmentasi ambang Otsu, deteksi tepi Canny, dan analisis kontur. Ruang lingkupnya hanya produk — buah, makanan, dan benda/produk manufaktur seperti baja pada dataset uji NEU Surface Defect Database (1.800 citra, 6 jenis cacat). <strong>Bukan untuk foto manusia:</strong> gambar yang terdeteksi berisi wajah akan ditolak otomatis dan tidak dinilai.</p>
   </div>
 </header>
 
@@ -25,6 +25,7 @@
       <input type="file" id="masukanBerkas" accept=".jpg,.jpeg,.png,.bmp,.webp" hidden>
       <p class="zona-teks-kecil">JPG / PNG / BMP / WebP, maks 10 MB</p>
     </div>
+    <p class="petunjuk">Unggah <strong>foto produk saja</strong> (mis. buah, makanan, atau benda) dan usahakan tanpa orang di dalamnya. Bila terdeteksi wajah manusia, gambar ditolak dengan penjelasan — manusia tidak pernah dinilai sebagai produk cacat oleh aplikasi ini.</p>
     <figure class="pratinjau">
       <img id="gambarPratinjau" alt="Pratinjau citra yang dipilih" hidden>
       <figcaption id="keteranganPratinjau">Belum ada citra dipilih. Kamu juga bisa memakai citra contoh dataset di bawah.</figcaption>
